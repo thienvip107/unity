@@ -27,6 +27,8 @@ public class Bird : MonoBehaviour {
 
 	public GameObject bcd;
 
+	public GameObject selectedSc;
+
 	Animator anim;
 
 
@@ -40,14 +42,15 @@ public class Bird : MonoBehaviour {
 
 		Camera mcam = GameObject.Find("Main Camera").GetComponent<Camera>();
 		mcam.orthographicSize = 8;
+        Destroy(selectedSc);
 	}
-	
+
 	void OnMouseUp(){
 		
 		spring.enabled = true;
 		rigidbody2D.isKinematic = false;
 		clickedOn = false;
-
+		Debug.Log(rigidbody2D.transform.position.x+"  "+ rigidbody2D.transform.position.y);
 		sourceslig[1].Play();
 
 		Camera mcam = GameObject.Find("Main Camera").GetComponent<Camera>();
@@ -59,19 +62,17 @@ public class Bird : MonoBehaviour {
 		spring = GetComponent<SpringJoint2D>();
 		catapult = spring.connectedBody.transform;
 		rigidbody2D = GetComponent<Rigidbody2D> ();
-
 		sourceslig = GetComponents<AudioSource>();
-
 		sourceslig[0].clip = slig;
 		sourceslig[1].clip = birdshot;
 		sourceslig[2].clip = brek;
-
+		Debug.Log("Awakeeeeee");
 
 	}
 
 
 	void Start () {
-
+		Debug.Log("Startttt");
 		anim = GameObject.Find("1").GetComponent<Animator>();
 
 		LineRenderSetup ();
@@ -82,6 +83,14 @@ public class Bird : MonoBehaviour {
 	    CircleCollider2D collider2D = GetComponent<CircleCollider2D> ();
 		CircleCollider2D circle = collider2D;
 		circleRadius = circle.radius;
+		
+	}
+
+	public void setItem (Sprite spt, GameObject seGO)
+    {
+		SpriteRenderer sp = GetComponent<SpriteRenderer>();
+		selectedSc = seGO;
+		sp.sprite = spt;
 	}
 	
 
@@ -89,7 +98,6 @@ public class Bird : MonoBehaviour {
 	if (clickedOn && test) {
 			Dragging ();
 		}
-
 		if (spring != null) {
 			if (!rigidbody2D.isKinematic && prevVelocity.sqrMagnitude > rigidbody2D.velocity.sqrMagnitude) {
 				Destroy (spring);
@@ -149,9 +157,14 @@ public class Bird : MonoBehaviour {
 		catapultLineBack.SetPosition(1,holdPoint);
 	}
 
-	void OnCollisionEnter2D (Collision2D coll){
-		
-		if(coll.gameObject.tag == "boxes"){
+	void OnCollisionEnter2D(Collision2D coll) {
+		Debug.Log(rigidbody2D.transform.position.x + "  " + rigidbody2D.transform.position.y);
+		if (coll.gameObject.tag == "landcore")
+        {
+			UIHealthBar.instance.SetValue((float)0.5);
+			Destroy(rigidbody2D.gameObject);
+		}
+		if (coll.gameObject.tag == "boxes"){
 			anim.SetTrigger("blast");
 			Destroy(coll.gameObject);
 		}
@@ -163,8 +176,5 @@ public class Bird : MonoBehaviour {
 			Destroy(coll.gameObject);
 		
 		}
-
-
-
 	}
 }

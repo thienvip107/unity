@@ -2,10 +2,15 @@
 using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
+using System.Runtime.InteropServices;
+using UnityEngine.Networking;
+using System.Collections.Generic;
+using System;
 
 public class test : MonoBehaviour
 {
-
+	[DllImport("__Internal")]
+	private static extern string GetJWTToken();
 
 	public GameObject Bird;
 	public int birdcount = 2;
@@ -16,9 +21,50 @@ public class test : MonoBehaviour
 	// Use this for initialization
 	void Start ()
 	{
-
 		friendbird = 0;
 		curbird = 0;
+		StartCoroutine(CallGetRequest("https://game-api.dev.sotadx.com/mini-game/get-list-season?game_id=621cf747494040d139f5c4c0", delegate (bool result, string respone)
+		{
+			if (result)
+			{
+				Debug.Log(result);
+			}
+		}));
+	}
+
+	public SessionInfo Session { get; private set; }
+	IEnumerator CallGetRequest(string uri, Action<bool, string> callback, Dictionary<string, string> header = null, Dictionary<string, object> form = null)
+    {
+		using (UnityWebRequest webRequest = UnityWebRequest.Get(uri))
+		{
+			Debug.Log("call requesttt");
+
+			webRequest.method = "GET";
+			if (Session != null)
+			{
+				webRequest.SetRequestHeader("Authorization", $"Bearer {Session.token}");
+			}
+			if (header != null)
+				foreach (var key in header.Keys)
+				{
+					webRequest.SetRequestHeader(key, header[key]);
+				}
+			// Request and wait for the desired page.
+			yield return webRequest.SendWebRequest();
+			string mess = webRequest.downloadHandler.text;
+			switch (webRequest.result)
+			{
+				case UnityWebRequest.Result.DataProcessingError:
+					Debug.Log(mess);
+					break;
+				case UnityWebRequest.Result.ProtocolError:
+					Debug.Log(mess);
+					break;
+				case UnityWebRequest.Result.Success:
+					callback?.Invoke(true, mess);
+					break;
+			}
+		}
 	}
 	
 	// Update is called once per frame
@@ -82,4 +128,10 @@ public class test : MonoBehaviour
 		Application.LoadLevel ("goto2");
 		Debug.Log("Level.done");
 	}
+}
+
+[Serializable]
+public class SessionInfo
+{
+	public string token { get; set; }
 }

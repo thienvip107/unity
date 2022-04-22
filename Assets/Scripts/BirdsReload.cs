@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.UI;
 
 public class BirdsReload : MonoBehaviour {
 
@@ -16,10 +17,14 @@ public class BirdsReload : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-
+		Debug.Log("Startt reloadddd");
 		while(Birdcount < 1){
 		GameObject birdaction = (GameObject)Instantiate(Bird);
 			Birdcount++;
+			Bird player = GameObject.Find("Player").GetComponent<Bird>();
+			List listG = GameObject.Find("List").GetComponent<List>();
+			GameObject fSc = listG.transform.GetChild(0).gameObject;
+			player.setItem(fSc.GetComponent<Image>().sprite, fSc);
 		}
 
 		}
